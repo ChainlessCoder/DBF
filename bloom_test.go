@@ -1,4 +1,4 @@
-package distbf
+package nonce_distbf
 
 import (
 	"crypto/sha512"
