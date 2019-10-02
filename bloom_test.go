@@ -51,55 +51,11 @@ func TestXorHash(t *testing.T) {
 	}
 }
 
-func TestMax(t *testing.T) {
-	type args struct {
-		a uint
-		b uint
-	}
-	tests := []struct {
-		name string
-		args args
-		want uint
-	}{
-		{
-			name: "max of two int",
-			args: args{
-				a: 100,
-				b: 101,
-			},
-			want: 101,
-		},
-		{
-			name: "max of two int",
-			args: args{
-				a: 100,
-				b: 99,
-			},
-			want: 100,
-		},
-		{
-			name: "max of two int",
-			args: args{
-				a: 100,
-				b: 100,
-			},
-			want: 100,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := max(tt.args.a, tt.args.b)
-			assert.Equalf(t, got, tt.want, "max() = %v, want %v", got, tt.want)
-		})
-	}
-}
-
 // tests are done under assumption that fpr=0.1
 // want result is taken from https://bitbucket.org/ww/bloom/src/829aa19d01d9/bloom.go
 func TestEstimateParameters(t *testing.T) {
 	type args struct {
-		n1 uint
-		n2 uint
+		n uint
 	}
 	type want struct {
 		k uint
@@ -113,23 +69,21 @@ func TestEstimateParameters(t *testing.T) {
 		{
 			name: "estimate parameters",
 			args: args{
-				n1: 100,
-				n2: 101,
+				n: 101,
 			},
 			want: want{k: 4, m: 485},
 		},
 		{
 			name: "estimate parameters",
 			args: args{
-				n1: 100,
-				n2: 99,
+				n: 100,
 			},
 			want: want{k: 4, m: 480},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			m, k := EstimateParameters(tt.args.n1, tt.args.n2)
+			m, k := EstimateParameters(tt.args.n)
 			got := want{m: m, k: k}
 			assert.Equalf(t, got, tt.want, "max() = %v, want %v", got, tt.want)
 		})
@@ -203,7 +157,7 @@ func TestAddElementHash(t *testing.T) {
 
 // this is more of an example than a test
 func TestNew(t *testing.T) {
-	dbf := New(1, 5)
+	dbf := New( 5)
 	if dbf.k == 0 || dbf.m == 0 {
 		t.Fatal("the distributed bloom filter should not have m=0 or k=0")
 	}
@@ -211,7 +165,7 @@ func TestNew(t *testing.T) {
 
 // this is more of an example than a test
 func TestHashModulo(t *testing.T) {
-	dbf := New(10, 11)
+	dbf := New(11)
 	otherNode := []byte("12345678901234567890123456789011")
 	element := []byte("message")
 	hashes := dbf.hashOfXOR(otherNode)
@@ -229,14 +183,14 @@ func TestHashModulo(t *testing.T) {
 
 // this is more of an example than a test
 func TestAdd(t *testing.T) {
-	dbf := New(10, 11)
+	dbf := New( 11)
 	otherNode := []byte("12345678901234567890123456789011")
 	element := []byte("message")
 	dbf.Add(element, otherNode)
 }
 
 func BenchmarkAdd(b *testing.B) {
-	dbf := New(uint(b.N), uint(b.N))
+	dbf := New(uint(b.N))
 	otherNode := []byte("12345678901234567890123456789011")
 	for i := 0; i < b.N; i++ {
 		elem := randStringBytes(8)

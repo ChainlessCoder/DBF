@@ -40,13 +40,6 @@ func EstimateParameters(n uint) (m uint, k uint) {
 	return
 }
 
-func max(x, y uint) uint {
-	if x < y {
-		return y
-	}
-	return x
-}
-
 func xorHash(a, b [sha512.Size256]byte) [sha512.Size256]byte {
 	var c [sha512.Size256]byte
 	for i := 0; i < len(a); i++ {
