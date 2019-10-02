@@ -27,15 +27,14 @@ func Init(elems [][]byte) {
 }
 
 // New function return the DBF generated from the sizes of to peers
-func New(n1, n2 uint) *DistBF {
-	m, k := EstimateParameters(n1, n2)
+func New(n uint) *DistBF {
+	m, k := EstimateParameters(n)
 	return &DistBF{m: m, k: k, b: bitset.New(m)}
 }
 
 // EstimateParameters estimates requirements for m and k.
 // Based on https://bitbucket.org/ww/bloom/src/829aa19d01d9/bloom.go
-func EstimateParameters(n1, n2 uint) (m uint, k uint) {
-	n := max(n1, n2)
+func EstimateParameters(n uint) (m uint, k uint) {
 	m = uint(math.Ceil(-1 * float64(n) * math.Log(fpr) / math.Pow(math.Log(2), 2)))
 	k = uint(math.Ceil(math.Log(2) * float64(m) / float64(n)))
 	return
