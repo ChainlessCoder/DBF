@@ -103,7 +103,7 @@ func (dbf *DistBF) syncBloomFilter(nonce []byte, otherBF *bitset.BitSet) [][]byt
 	var ret [][]byte
 
 	for _, elem := range elements {
-		if !dbf.test(elem, nonce, otherBF) {
+		if !dbf.Test(elem, nonce, otherBF) {
 			ret = append(ret, elem)
 		}
 	}
@@ -111,8 +111,8 @@ func (dbf *DistBF) syncBloomFilter(nonce []byte, otherBF *bitset.BitSet) [][]byt
 	return ret
 }
 
-// test returns true if element is in DBF, false otherwise
-func (dbf *DistBF) test(elem, nonce []byte, b *bitset.BitSet) bool {
+// Test returns true if element is in DBF, false otherwise
+func (dbf *DistBF) Test(elem, nonce []byte, b *bitset.BitSet) bool {
 	hashes := dbf.hashOfXOR(nonce)
 	dbf.addElementHash(elem, hashes)
 	locations := dbf.hashesModulo(hashes)
@@ -126,4 +126,8 @@ func (dbf *DistBF) test(elem, nonce []byte, b *bitset.BitSet) bool {
 
 func (dbf *DistBF) B() *bitset.BitSet {
 	return dbf.b
+}
+
+func NewDBFBitSet(b *bitset.BitSet) *DistBF {
+	return nil
 }

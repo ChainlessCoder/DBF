@@ -8,7 +8,7 @@ import (
 )
 
 func TestIHash(t *testing.T) {
-	// for this we want to test that no two hashes are equal
+	// for this we want to Test that no two hashes are equal
 	data := []byte("message")
 	k := 10
 	hashes := make(map[[sha512.Size256]byte]bool)

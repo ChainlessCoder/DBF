@@ -155,7 +155,7 @@ func TestAddElementHash(t *testing.T) {
 	}
 }
 
-// this is more of an example than a test
+// this is more of an example than a Test
 func TestNew(t *testing.T) {
 	dbf := New( 5)
 	if dbf.k == 0 || dbf.m == 0 {
@@ -163,7 +163,7 @@ func TestNew(t *testing.T) {
 	}
 }
 
-// this is more of an example than a test
+// this is more of an example than a Test
 func TestHashModulo(t *testing.T) {
 	dbf := New(11)
 	otherNode := []byte("12345678901234567890123456789011")
@@ -181,7 +181,7 @@ func TestHashModulo(t *testing.T) {
 	}
 }
 
-// this is more of an example than a test
+// this is more of an example than a Test
 func TestAdd(t *testing.T) {
 	dbf := New( 11)
 	otherNode := []byte("12345678901234567890123456789011")
