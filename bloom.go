@@ -6,12 +6,6 @@ import (
 	"github.com/willf/bitset"
 )
 
-// system-wide false positive rate constant
-const fpr = 0.1
-
-// periodic task time in seconds, there the periodic task is sending the bloom filter to neighbor
-const period = 3
-
 
 var elements [][]byte
 
@@ -27,14 +21,14 @@ func Init(elems [][]byte) {
 }
 
 // New function return the DBF generated from the sizes of to peers
-func New(n uint) *DistBF {
-	m, k := EstimateParameters(n)
+func New(n uint, fpr float64) *DistBF {
+	m, k := EstimateParameters(n, fpr)
 	return &DistBF{m: m, k: k, b: bitset.New(m)}
 }
 
 // EstimateParameters estimates requirements for m and k.
 // Based on https://bitbucket.org/ww/bloom/src/829aa19d01d9/bloom.go
-func EstimateParameters(n uint) (m uint, k uint) {
+func EstimateParameters(n uint, fpr float64) (m uint, k uint) {
 	m = uint(math.Ceil(-1 * float64(n) * math.Log(fpr) / math.Pow(math.Log(2), 2)))
 	k = uint(math.Ceil(math.Log(2) * float64(m) / float64(n)))
 	return
@@ -51,9 +45,9 @@ func xorHash(a, b [sha512.Size256]byte) [sha512.Size256]byte {
 // in this branch we are not xor, but we keep the naming
 // hashOfXOR functions hashes the XOR of nodes ID, and for the i'th iteration we append to XOR
 // result integer i and then hash it with sha512_256
-func (dbf *DistBF) hashOfXOR(nonce []byte) (ret [][sha512.Size256]byte) {
+func (dbf *DistBF) seedValues(seed []byte) (ret [][sha512.Size256]byte) {
 	for i := 0; i < int(dbf.k); i++ {
-		ret = append(ret, iHash(nonce, i))
+		ret = append(ret, iHash(seed, i))
 	}
 	return
 }
@@ -76,8 +70,8 @@ func (dbf *DistBF) hashesModulo(hashes [][sha512.Size256]byte) (ret []uint) {
 
 // Add element to DBF
 // TODO: save hashes of elements
-func (dbf *DistBF) Add(element []byte, nonce []byte) {
-	hashes := dbf.hashOfXOR(nonce)
+func (dbf *DistBF) Add(element []byte, seed []byte) {
+	hashes := dbf.seedValues(seed)
 	dbf.addElementHash(element, hashes)
 	locations := dbf.hashesModulo(hashes)
 	for _, location := range locations {
@@ -103,7 +97,7 @@ func (dbf *DistBF) syncBloomFilter(nonce []byte, otherBF *bitset.BitSet) [][]byt
 	var ret [][]byte
 
 	for _, elem := range elements {
-		if !dbf.Test(elem, nonce, otherBF) {
+		if !dbf.Verify(elem, nonce, otherBF) {
 			ret = append(ret, elem)
 		}
 	}
@@ -111,9 +105,9 @@ func (dbf *DistBF) syncBloomFilter(nonce []byte, otherBF *bitset.BitSet) [][]byt
 	return ret
 }
 
-// Test returns true if element is in DBF, false otherwise
-func (dbf *DistBF) Test(elem, nonce []byte, b *bitset.BitSet) bool {
-	hashes := dbf.hashOfXOR(nonce)
+// Verify returns true if element is in DBF, false otherwise
+func (dbf *DistBF) Verify(elem, seed []byte, b *bitset.BitSet) bool {
+	hashes := dbf.seedValues(seed)
 	dbf.addElementHash(elem, hashes)
 	locations := dbf.hashesModulo(hashes)
 	for i := uint(0); i < dbf.k; i++ {
