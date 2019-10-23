@@ -7,7 +7,6 @@ import (
 )
 
 
-var elements [][]byte
 
 type DistBF struct {
 	b *bitset.BitSet
@@ -16,10 +15,6 @@ type DistBF struct {
 	h [][sha512.Size256]byte
 }
 
-// Init function populates the variables with their initial values
-func Init(elems [][]byte) {
-	elements = elems
-}
 
 // New function return the DBF generated from the sizes of to peers
 func NewDbf(n uint, fpr float64, seedValue []byte) *DistBF {
@@ -91,7 +86,7 @@ func compare(bc1, bc2 *bitset.BitSet) (bool, uint, uint) {
 
 // syncBloomFilter tests if the otherNode has our elements
 // TODO: optimize, combine with compare?
-func (dbf *DistBF) syncBloomFilter(nonce []byte, otherBF *bitset.BitSet) [][]byte {
+func (dbf *DistBF) syncBloomFilter(nonce []byte, otherBF *bitset.BitSet, elements [][]byte) [][]byte {
 	var ret [][]byte
 
 	for _, elem := range elements {
@@ -115,7 +110,7 @@ func (dbf *DistBF) Verify(elem []byte, b *bitset.BitSet) bool {
 	return true
 }
 
-func (dbf *DistBF) B() *bitset.BitSet {
+func (dbf *DistBF) BitArray() *bitset.BitSet {
 	return dbf.b
 }
 
