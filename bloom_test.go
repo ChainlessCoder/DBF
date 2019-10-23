@@ -1,4 +1,4 @@
-package nonce_distbf
+package DBF
 
 import (
 	"crypto/sha512"
@@ -83,20 +83,20 @@ func TestEstimateParameters(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			m, k := EstimateParameters(tt.args.n)
+			m, k := EstimateParameters(tt.args.n, 0.1)
 			got := want{m: m, k: k}
 			assert.Equalf(t, got, tt.want, "max() = %v, want %v", got, tt.want)
 		})
 	}
 }
 
-func TestHashOfXor(t *testing.T) {
+func TestSeedHashes(t *testing.T) {
 	d := DistBF{}
 	k := 10
 	d.k = uint(10)
 	d.m = 100
-	otherNode := []byte("12345678901234567890123456789011")
-	hashes := d.hashOfXOR(otherNode)
+	seed := []byte("2")
+	hashes := seedHashes(seed,d.k)
 	// there should be k hashes
 	if len(hashes) != k {
 		t.Fatal("there are not k hashes")
@@ -119,8 +119,8 @@ func TestAddElementHash(t *testing.T) {
 	k := 10
 	d.k = uint(10)
 	d.m = 100
-	otherNode := []byte("12345678901234567890123456789011")
-	hashes := d.hashOfXOR(otherNode)
+	seed := []byte("3")
+	hashes := seedHashes(seed,d.k)
 	// there should be k hashes
 	if len(hashes) != k {
 		t.Fatal("there are not k hashes")
@@ -157,7 +157,7 @@ func TestAddElementHash(t *testing.T) {
 
 // this is more of an example than a Test
 func TestNew(t *testing.T) {
-	dbf := New( 5)
+	dbf := NewDbf(5, 0.2, []byte("2"))
 	if dbf.k == 0 || dbf.m == 0 {
 		t.Fatal("the distributed bloom filter should not have m=0 or k=0")
 	}
@@ -165,12 +165,10 @@ func TestNew(t *testing.T) {
 
 // this is more of an example than a Test
 func TestHashModulo(t *testing.T) {
-	dbf := New(11)
-	otherNode := []byte("12345678901234567890123456789011")
+	dbf := NewDbf(11, 0.2, []byte("2"))
 	element := []byte("message")
-	hashes := dbf.hashOfXOR(otherNode)
-	dbf.addElementHash(element, hashes)
-	modulus := dbf.hashesModulo(hashes)
+	dbf.addElementHash(element, dbf.h)
+	modulus := dbf.hashesModulo(dbf.h)
 	if len(modulus) != int(dbf.k) {
 		t.Fatal("there must be k bit strings")
 	}
@@ -183,18 +181,16 @@ func TestHashModulo(t *testing.T) {
 
 // this is more of an example than a Test
 func TestAdd(t *testing.T) {
-	dbf := New( 11)
-	otherNode := []byte("12345678901234567890123456789011")
+	dbf := NewDbf(11, 0.2, []byte("2"))
 	element := []byte("message")
-	dbf.Add(element, otherNode)
+	dbf.Add(element)
 }
 
 func BenchmarkAdd(b *testing.B) {
-	dbf := New(uint(b.N))
-	otherNode := []byte("12345678901234567890123456789011")
+	dbf := NewDbf(uint(b.N), 0.2, []byte("2"))
 	for i := 0; i < b.N; i++ {
 		elem := randStringBytes(8)
-		dbf.Add([]byte(elem), otherNode)
+		dbf.Add([]byte(elem))
 	}
 }
 

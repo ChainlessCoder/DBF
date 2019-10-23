@@ -1,9 +1,9 @@
-module github.com/arberiii/Distributed-Bloom-Filter
+module github.com/labbloom/nonce-dbf
 
 go 1.12
 
 require (
-	github.com/arberiii/peer v0.0.0-20190924142933-3ac0dbfd4f14
+	github.com/arberiii/peer v0.0.0-20190924142933-3ac0dbfd4f14 // indirect
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
 	github.com/stretchr/objx v0.2.0 // indirect
 	github.com/stretchr/testify v1.4.0
