@@ -3,10 +3,9 @@ package DBF
 import (
 	"crypto/sha512"
 	"math"
+
 	"github.com/willf/bitset"
 )
-
-
 
 type DistBF struct {
 	b *bitset.BitSet
@@ -14,7 +13,6 @@ type DistBF struct {
 	k uint
 	h [][sha512.Size256]byte
 }
-
 
 // New function return the DBF generated from the sizes of to peers
 func NewDbf(n uint, fpr float64, s []byte) *DistBF {
@@ -38,7 +36,6 @@ func xorHash(a, b [sha512.Size256]byte) [sha512.Size256]byte {
 	}
 	return c
 }
-
 
 func seedHashes(seedValue []byte, k uint) (ret [][sha512.Size256]byte) {
 	for i := 0; i < int(k); i++ {
