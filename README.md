@@ -13,5 +13,5 @@ dbf.Add(element)
 ```
 ## Installation
 ```
-go get github.com/labbloom/Distributed-Bloom-Filter 
+go get github.com/labbloom/DBF
 ```
