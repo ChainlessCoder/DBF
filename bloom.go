@@ -17,9 +17,9 @@ type DistBF struct {
 
 
 // New function return the DBF generated from the sizes of to peers
-func NewDbf(n uint, fpr float64, seedValue []byte) *DistBF {
+func NewDbf(n uint, fpr float64, s []byte) *DistBF {
 	m, k := EstimateParameters(n, fpr)
-	h := seedHashes(seedValue, k)
+	h := seedHashes(s, k)
 	return &DistBF{h: h, m: m, k: k, b: bitset.New(m)}
 }
 
