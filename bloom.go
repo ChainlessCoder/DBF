@@ -13,6 +13,7 @@ type DistBF struct {
 	b *bitset.BitSet
 	m uint
 	k uint
+	h [][sha512.Size256]byte
 }
 
 // Init function populates the variables with their initial values
@@ -21,9 +22,10 @@ func Init(elems [][]byte) {
 }
 
 // New function return the DBF generated from the sizes of to peers
-func New(n uint, fpr float64) *DistBF {
+func NewDbf(n uint, fpr float64, seedValue []byte) *DistBF {
 	m, k := EstimateParameters(n, fpr)
-	return &DistBF{m: m, k: k, b: bitset.New(m)}
+	h := seedHashes(seedValue, k)
+	return &DistBF{h: h, m: m, k: k, b: bitset.New(m)}
 }
 
 // EstimateParameters estimates requirements for m and k.
@@ -42,12 +44,10 @@ func xorHash(a, b [sha512.Size256]byte) [sha512.Size256]byte {
 	return c
 }
 
-// in this branch we are not xor, but we keep the naming
-// hashOfXOR functions hashes the XOR of nodes ID, and for the i'th iteration we append to XOR
-// result integer i and then hash it with sha512_256
-func (dbf *DistBF) seedValues(seed []byte) (ret [][sha512.Size256]byte) {
-	for i := 0; i < int(dbf.k); i++ {
-		ret = append(ret, iHash(seed, i))
+
+func seedHashes(seedValue []byte, k uint) (ret [][sha512.Size256]byte) {
+	for i := 0; i < int(k); i++ {
+		ret = append(ret, iHash(seedValue, i))
 	}
 	return
 }
@@ -69,11 +69,9 @@ func (dbf *DistBF) hashesModulo(hashes [][sha512.Size256]byte) (ret []uint) {
 }
 
 // Add element to DBF
-// TODO: save hashes of elements
-func (dbf *DistBF) Add(element []byte, seed []byte) {
-	hashes := dbf.seedValues(seed)
-	dbf.addElementHash(element, hashes)
-	locations := dbf.hashesModulo(hashes)
+func (dbf *DistBF) Add(element []byte) {
+	dbf.addElementHash(element, dbf.h)
+	locations := dbf.hashesModulo(dbf.h)
 	for _, location := range locations {
 		dbf.b.Set(location)
 	}
@@ -97,7 +95,7 @@ func (dbf *DistBF) syncBloomFilter(nonce []byte, otherBF *bitset.BitSet) [][]byt
 	var ret [][]byte
 
 	for _, elem := range elements {
-		if !dbf.Verify(elem, nonce, otherBF) {
+		if !dbf.Verify(elem, otherBF) {
 			ret = append(ret, elem)
 		}
 	}
@@ -106,10 +104,9 @@ func (dbf *DistBF) syncBloomFilter(nonce []byte, otherBF *bitset.BitSet) [][]byt
 }
 
 // Verify returns true if element is in DBF, false otherwise
-func (dbf *DistBF) Verify(elem, seed []byte, b *bitset.BitSet) bool {
-	hashes := dbf.seedValues(seed)
-	dbf.addElementHash(elem, hashes)
-	locations := dbf.hashesModulo(hashes)
+func (dbf *DistBF) Verify(elem []byte, b *bitset.BitSet) bool {
+	dbf.addElementHash(elem, dbf.h)
+	locations := dbf.hashesModulo(dbf.h)
 	for i := uint(0); i < dbf.k; i++ {
 		if !b.Test(locations[i]) {
 			return false
