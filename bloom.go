@@ -62,7 +62,9 @@ func (dbf *DistBF) hashesModulo(hashes [][sha512.Size256]byte) (ret []uint) {
 
 // Add element to DBF
 func (dbf *DistBF) Add(element []byte) {
-	dbf.addElementHash(element, dbf.h)
+	tmp := make([][sha512.Size256]byte, len(dbf.h))
+	copy(tmp, dbf.h)
+	dbf.addElementHash(element, tmp)
 	locations := dbf.hashesModulo(dbf.h)
 	for _, location := range locations {
 		dbf.b.Set(location)
@@ -97,7 +99,9 @@ func (dbf *DistBF) syncBloomFilter(nonce []byte, otherBF *bitset.BitSet, element
 
 // Verify returns true if element is in DBF, false otherwise
 func (dbf *DistBF) Verify(elem []byte, b *bitset.BitSet) bool {
-	dbf.addElementHash(elem, dbf.h)
+	tmp := make([][sha512.Size256]byte, len(dbf.h))
+	copy(tmp, dbf.h)
+	dbf.addElementHash(elem, tmp)
 	locations := dbf.hashesModulo(dbf.h)
 	for i := uint(0); i < dbf.k; i++ {
 		if !b.Test(locations[i]) {
