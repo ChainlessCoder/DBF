@@ -45,11 +45,13 @@ func seedHashes(seedValue []byte, k uint) (ret [][sha512.Size256]byte) {
 }
 
 // addElementHash xor the result of function hashOfXOR with the hash of element (component wise)❤
-func (dbf *DistBF) addElementHash(element []byte, hashes [][sha512.Size256]byte) {
+func addElementHash(element []byte, hashes [][sha512.Size256]byte) [][sha512.Size256]byte {
+	ret := make([][sha512.Size256]byte, len(hashes))
 	h := hashElement(element)
 	for i := 0; i < len(hashes); i++ {
-		hashes[i] = xorHash(hashes[i], h)
+		ret[i] = xorHash(hashes[i], h)
 	}
+	return ret
 }
 
 // hashesModule find the location where to set bits in Bloom Filter
@@ -62,10 +64,8 @@ func (dbf *DistBF) hashesModulo(hashes [][sha512.Size256]byte) (ret []uint) {
 
 // Add element to DBF
 func (dbf *DistBF) Add(element []byte) {
-	tmp := make([][sha512.Size256]byte, len(dbf.h))
-	copy(tmp, dbf.h)
-	dbf.addElementHash(element, tmp)
-	locations := dbf.hashesModulo(dbf.h)
+	tmp := addElementHash(element, dbf.h)
+	locations := dbf.hashesModulo(tmp)
 	for _, location := range locations {
 		dbf.b.Set(location)
 	}
@@ -99,10 +99,8 @@ func (dbf *DistBF) syncBloomFilter(nonce []byte, otherBF *bitset.BitSet, element
 
 // Verify returns true if element is in DBF, false otherwise
 func (dbf *DistBF) Verify(elem []byte, b *bitset.BitSet) bool {
-	tmp := make([][sha512.Size256]byte, len(dbf.h))
-	copy(tmp, dbf.h)
-	dbf.addElementHash(elem, tmp)
-	locations := dbf.hashesModulo(dbf.h)
+	tmp := addElementHash(elem, dbf.h)
+	locations := dbf.hashesModulo(tmp)
 	for i := uint(0); i < dbf.k; i++ {
 		if !b.Test(locations[i]) {
 			return false
