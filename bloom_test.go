@@ -96,7 +96,7 @@ func TestSeedHashes(t *testing.T) {
 	d.k = uint(10)
 	d.m = 100
 	seed := []byte("2")
-	hashes := seedHashes(seed,d.k)
+	hashes := seedHashes(seed, d.k)
 	// there should be k hashes
 	if len(hashes) != k {
 		t.Fatal("there are not k hashes")
@@ -120,7 +120,7 @@ func TestAddElementHash(t *testing.T) {
 	d.k = uint(10)
 	d.m = 100
 	seed := []byte("3")
-	hashes := seedHashes(seed,d.k)
+	hashes := seedHashes(seed, d.k)
 	// there should be k hashes
 	if len(hashes) != k {
 		t.Fatal("there are not k hashes")
@@ -139,7 +139,7 @@ func TestAddElementHash(t *testing.T) {
 	element := []byte("message")
 	oldHashes := make([][sha512.Size256]byte, len(hashes))
 	copy(oldHashes, hashes)
-	d.addElementHash(element, hashes)
+	hashes = addElementHash(element, hashes)
 	// check for uniqueness and if it changes
 	newHashes := make(map[[sha512.Size256]byte]bool)
 	for i := 0; i < k; i++ {
@@ -167,7 +167,7 @@ func TestNew(t *testing.T) {
 func TestHashModulo(t *testing.T) {
 	dbf := NewDbf(11, 0.2, []byte("2"))
 	element := []byte("message")
-	dbf.addElementHash(element, dbf.h)
+	addElementHash(element, dbf.h)
 	modulus := dbf.hashesModulo(dbf.h)
 	if len(modulus) != int(dbf.k) {
 		t.Fatal("there must be k bit strings")
