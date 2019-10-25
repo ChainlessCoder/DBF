@@ -55,9 +55,9 @@ func addElementHash(element []byte, hashes [][sha512.Size256]byte) [][sha512.Siz
 }
 
 // hashesModule find the location where to set bits in Bloom Filter
-func (dbf *DistBF) hashesModulo(hashes [][sha512.Size256]byte) (ret []uint) {
+func hashesModulo(m uint, hashes [][sha512.Size256]byte) (ret []uint) {
 	for _, hash := range hashes {
-		ret = append(ret, byteModuloM(dbf.m, hash))
+		ret = append(ret, byteModuloM(m, hash))
 	}
 	return
 }
@@ -65,7 +65,7 @@ func (dbf *DistBF) hashesModulo(hashes [][sha512.Size256]byte) (ret []uint) {
 // Add element to DBF
 func (dbf *DistBF) Add(element []byte) {
 	tmp := addElementHash(element, dbf.h)
-	locations := dbf.hashesModulo(tmp)
+	locations := hashesModulo(dbf.m, tmp)
 	for _, location := range locations {
 		dbf.b.Set(location)
 	}
@@ -89,7 +89,7 @@ func (dbf *DistBF) syncBloomFilter(nonce []byte, otherBF *bitset.BitSet, element
 	var ret [][]byte
 
 	for _, elem := range elements {
-		if !dbf.Verify(elem, otherBF) {
+		if !VerifyBitArray(dbf, elem, otherBF) {
 			ret = append(ret, elem)
 		}
 	}
@@ -97,10 +97,22 @@ func (dbf *DistBF) syncBloomFilter(nonce []byte, otherBF *bitset.BitSet, element
 	return ret
 }
 
-// Verify returns true if element is in DBF, false otherwise
-func (dbf *DistBF) Verify(elem []byte, b *bitset.BitSet) bool {
+// VerifyElement returns true if element is in DBF, false otherwise
+func (dbf *DistBF) VerifyElement(elem []byte) bool {
 	tmp := addElementHash(elem, dbf.h)
-	locations := dbf.hashesModulo(tmp)
+	locations := hashesModulo(dbf.m, tmp)
+	for i := uint(0); i < dbf.k; i++ {
+		if !dbf.b.Test(locations[i]) {
+			return false
+		}
+	}
+	return true
+}
+
+// VerifyBitArray returns true if element is in the other DBF, false otherwise
+func VerifyBitArray(dbf *DistBF, elem []byte, b *bitset.BitSet) bool {
+	tmp := addElementHash(elem, dbf.h)
+	locations := hashesModulo(dbf.m, tmp)
 	for i := uint(0); i < dbf.k; i++ {
 		if !b.Test(locations[i]) {
 			return false
@@ -115,4 +127,21 @@ func (dbf *DistBF) BitArray() *bitset.BitSet {
 
 func NewDBFBitSet(b *bitset.BitSet) *DistBF {
 	return nil
+}
+
+// GetBitIndices returns the indices of every 1 in the dbf
+func (dbf *DistBF) GetBitIndices() (indices []uint) {
+	for i := uint(0); i < dbf.m; i++ {
+		if dbf.b.Test(i) {
+			indices = append(indices, i)
+		}
+	}
+	return
+}
+
+// GetElementIndices returns the dbf indices an element would have if mapped to the dbf
+func (dbf *DistBF) GetElementIndices(elem []byte) (indices []uint) {
+	tmp := addElementHash(elem, dbf.h)
+	indices = hashesModulo(dbf.m, tmp)
+	return
 }
