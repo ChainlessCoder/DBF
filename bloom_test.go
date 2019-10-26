@@ -167,8 +167,8 @@ func TestNew(t *testing.T) {
 func TestHashModulo(t *testing.T) {
 	dbf := NewDbf(11, 0.2, []byte("2"))
 	element := []byte("message")
-	addElementHash(element, dbf.h)
-	modulus := dbf.hashesModulo(dbf.h)
+	tmp := addElementHash(element, dbf.h)
+	modulus := hashesModulo(dbf.m, tmp)
 	if len(modulus) != int(dbf.k) {
 		t.Fatal("there must be k bit strings")
 	}
@@ -177,6 +177,41 @@ func TestHashModulo(t *testing.T) {
 			t.Fatal("range of modulo is not m")
 		}
 	}
+}
+
+func TestGetElementIndices(t *testing.T) {
+	dbf := NewDbf(10, 0.5, []byte("seed"))
+	element := []byte("something")
+	realHashes := []uint{9, 10}
+	computedHashes := dbf.GetElementIndices(element)
+	if len(realHashes) != len(computedHashes) {
+		t.Fatal("the computed hashes are incorrect")
+	}
+	for i := uint(0); i < uint(len(realHashes)); i++ {
+		if realHashes[i] != computedHashes[i] {
+			t.Fatal("the computed hashes are incorrect")
+		}
+	}
+
+}
+
+func GetBitIndices(t *testing.T) {
+	dbf := NewDbf(10, 0.5, []byte("seed"))
+	element := []byte("something")
+	element1 := []byte("something else")
+	dbf.Add(element)
+	dbf.Add(element1)
+	realHashes := []uint{4, 8, 9, 10}
+	computedHashes := dbf.GetBitIndices()
+	if len(realHashes) != len(computedHashes) {
+		t.Fatal("the computed indices are incorrect")
+	}
+	for i := uint(0); i < uint(len(realHashes)); i++ {
+		if realHashes[i] != computedHashes[i] {
+			t.Fatal("the computed indices are incorrect")
+		}
+	}
+
 }
 
 // this is more of an example than a Test

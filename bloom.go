@@ -7,6 +7,7 @@ import (
 	"github.com/willf/bitset"
 )
 
+// DistBF is the dbf struct
 type DistBF struct {
 	b *bitset.BitSet
 	m uint
@@ -14,7 +15,7 @@ type DistBF struct {
 	h [][sha512.Size256]byte
 }
 
-// New function return the DBF generated from the sizes of to peers
+// NewDbf function return the DBF generated from the sizes of to peers
 func NewDbf(n uint, fpr float64, s []byte) *DistBF {
 	m, k := EstimateParameters(n, fpr)
 	h := seedHashes(s, k)
