@@ -1,4 +1,4 @@
-module github.com/labbloom/nonce-dbf
+module github.com/labbloom/DBF
 
 go 1.12
 
