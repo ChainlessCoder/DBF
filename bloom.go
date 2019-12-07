@@ -148,15 +148,15 @@ func (dbf *DistBF) GetElementIndices(elem []byte) (indices []uint) {
 }
 
 // VerifyElement returns true if element is in DBF, false otherwise
-func (dbf *DistBF) Proof(elem []byte) ([]uint, bool) {
-	var ret []uint
+func (dbf *DistBF) Proof(elem []byte) ([]int, bool) {
+	var ret []int
 	tmp := addElementHash(elem, dbf.h)
 	locations := hashesModulo(dbf.m, tmp)
 	for i := uint(0); i < dbf.k; i++ {
 		if !dbf.b.Test(locations[i]) {
-			return []uint{i}, false
+			return []int{int(i)}, false
 		} else {
-			ret = append(ret, i)
+			ret = append(ret, int(i))
 		}
 	}
 	return ret, true
