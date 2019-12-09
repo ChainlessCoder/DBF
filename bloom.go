@@ -154,9 +154,9 @@ func (dbf *DistBF) Proof(elem []byte) ([]int, bool) {
 	locations := hashesModulo(dbf.m, tmp)
 	for i := uint(0); i < dbf.k; i++ {
 		if !dbf.b.Test(locations[i]) {
-			return []int{int(i)}, false
+			return []int{int(locations[i])}, false
 		} else {
-			ret = append(ret, int(i))
+			ret = append(ret, int(locations[i]))
 		}
 	}
 	return ret, true
