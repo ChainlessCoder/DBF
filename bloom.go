@@ -147,7 +147,7 @@ func (dbf *DistBF) GetElementIndices(elem []byte) (indices []uint) {
 	return
 }
 
-// VerifyElement returns true if element is in DBF, false otherwise
+// Proof returns true if element is in DBF, false otherwise
 func (dbf *DistBF) Proof(elem []byte) ([]int, bool) {
 	var ret []int
 	tmp := addElementHash(elem, dbf.h)
@@ -160,4 +160,11 @@ func (dbf *DistBF) Proof(elem []byte) ([]int, bool) {
 		}
 	}
 	return ret, true
+}
+
+// SetIndices increments bit array values without inserting an element.
+func (dbf *DistBF) SetIndices(indices []int) {
+	for _, elm := range indices {
+		dbf.b.Set(elm)
+	}
 }
