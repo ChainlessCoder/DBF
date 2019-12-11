@@ -165,6 +165,6 @@ func (dbf *DistBF) Proof(elem []byte) ([]int, bool) {
 // SetIndices increments bit array values without inserting an element.
 func (dbf *DistBF) SetIndices(indices []int) {
 	for _, elm := range indices {
-		dbf.b.Set(elm)
+		dbf.b.Set(uint(elm))
 	}
 }
