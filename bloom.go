@@ -1,7 +1,9 @@
 package DBF
 
 import (
+	"bytes"
 	"crypto/sha512"
+	"encoding/gob"
 	"math"
 
 	"github.com/willf/bitset"
@@ -156,8 +158,60 @@ func (dbf *DistBF) Proof(elem []byte) ([]int, bool) {
 		if !dbf.b.Test(locations[i]) {
 			return []int{int(i)}, false
 		} else {
-			ret = append(ret, int(i))
+			ret = append(ret, int(locations[i]))
 		}
 	}
 	return ret, true
+}
+
+// helper struct to encode DBF to byte
+type DEncode struct {
+	B []byte
+	M uint
+	K uint
+	H [][sha512.Size256]byte
+}
+
+func (dbf *DistBF) Bytes() ([]byte, error) {
+	var dE DEncode
+	dE.M = dbf.m
+	dE.H = dbf.h
+	dE.K = dbf.k
+	b, err := dbf.b.MarshalBinary()
+	if err != nil {
+		return nil, err
+	}
+	dE.B = b
+	var buf bytes.Buffer
+	enc := gob.NewEncoder(&buf)
+
+	err = enc.Encode(dE)
+	if err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+
+func UnmarshalBinary(b []byte) (*DistBF, error) {
+	buf := bytes.NewBuffer(b)
+
+	dec := gob.NewDecoder(buf)
+
+	var dE *DEncode
+	if err := dec.Decode(&dE); err != nil {
+		return nil, err
+	}
+
+	var d DistBF
+	d.m = dE.M
+	d.h = dE.H
+	d.k = dE.K
+
+	bloom := bitset.New(0)
+	err := bloom.UnmarshalBinary(dE.B)
+	if err != nil {
+		return nil, err
+	}
+
+	return &d, nil
 }
