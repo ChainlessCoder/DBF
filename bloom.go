@@ -149,20 +149,21 @@ func (dbf *DistBF) GetElementIndices(elem []byte) (indices []uint) {
 	return
 }
 
-// VerifyElement returns true if element is in DBF, false otherwise
+// Proof returns true if element is in DBF, false otherwise
 func (dbf *DistBF) Proof(elem []byte) ([]int, bool) {
 	var ret []int
 	tmp := addElementHash(elem, dbf.h)
 	locations := hashesModulo(dbf.m, tmp)
 	for i := uint(0); i < dbf.k; i++ {
 		if !dbf.b.Test(locations[i]) {
-			return []int{int(i)}, false
+			return []int{int(locations[i])}, false
 		} else {
 			ret = append(ret, int(locations[i]))
 		}
 	}
 	return ret, true
 }
+
 
 // helper struct to encode DBF to byte
 type DEncode struct {
@@ -214,4 +215,10 @@ func UnmarshalBinary(b []byte) (*DistBF, error) {
 	}
 
 	return &d, nil
+}
+// SetIndices increments bit array values without inserting an element.
+func (dbf *DistBF) SetIndices(indices []int) {
+	for _, elm := range indices {
+		dbf.b.Set(uint(elm))
+	}
 }
