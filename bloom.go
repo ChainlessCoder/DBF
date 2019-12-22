@@ -185,7 +185,6 @@ func (dbf *DistBF) Bytes() ([]byte, error) {
 	dE.B = b
 	var buf bytes.Buffer
 	enc := gob.NewEncoder(&buf)
-
 	err = enc.Encode(dE)
 	if err != nil {
 		return nil, err
@@ -202,7 +201,6 @@ func UnmarshalBinary(b []byte) (*DistBF, error) {
 	if err := dec.Decode(&dE); err != nil {
 		return nil, err
 	}
-
 	var d DistBF
 	d.m = dE.M
 	d.h = dE.H
@@ -213,6 +211,7 @@ func UnmarshalBinary(b []byte) (*DistBF, error) {
 	if err != nil {
 		return nil, err
 	}
+	d.b = bloom
 
 	return &d, nil
 }
