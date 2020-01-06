@@ -221,3 +221,7 @@ func (dbf *DistBF) SetIndices(indices []int) {
 		dbf.b.Set(uint(elm))
 	}
 }
+
+func (dbf *DistBF) SetBitSet(b *bitset.BitSet) {
+	dbf.b = b
+}
