@@ -149,6 +149,14 @@ func (dbf *DistBF) GetElementIndices(elem []byte) (indices []uint) {
 	return
 }
 
+// MapElementToBF returns the indices an element would have if mapped to a dbf, but with a different seedValue
+func (dbf *DistBF) MapElementToBF(elem, seedValue []byte) (indices []uint) {
+	h := seedHashes(seedValue, dbf.k)
+	tmp := addElementHash(elem, h)
+	indices = hashesModulo(dbf.m, tmp)
+	return
+}
+
 // Proof returns true if element is in DBF, false otherwise
 func (dbf *DistBF) Proof(elem []byte) ([]uint64, bool) {
 	var ret []uint64
