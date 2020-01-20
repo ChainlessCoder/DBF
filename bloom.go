@@ -128,6 +128,10 @@ func (dbf *DistBF) BitArray() *bitset.BitSet {
 	return dbf.b
 }
 
+func (dbf *DistBF) NumOfHashes() uint {
+	return dbf.k
+}
+
 func NewDBFBitSet(b *bitset.BitSet) *DistBF {
 	return nil
 }
