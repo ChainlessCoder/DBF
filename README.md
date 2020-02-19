@@ -15,3 +15,5 @@ dbf.Add(element)
 ```
 go get github.com/labbloom/DBF
 ```
+### License
+[Apache-2.0](https://github.com/labbloom/DBF/blob/master/LICENSE)
